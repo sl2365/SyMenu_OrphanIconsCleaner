@@ -2,17 +2,29 @@
 ;	Script for AutoHotKey for Move/Delete the SyMenu Orphan Icons
 ;CHANGELOG:
 ; Requires v2.0 AutoHotkey to compile.
-;		V.1.0.-2017.01.27: First version
-;		V.2.0.-2026.04.01: Converted to AHK v2
-;		V.2.1.-2026.04.01: Added exclusion list support via Exclusions.txt
-;		V.2.2.-2026.04.01: Inline edit/save for exclusions, path fixes
-;		V.2.3.-2026.04.01: Settings persistence via Settings.ini
-;		V.2.4.-2026.04.01: Side-by-side layout (exclusions left, log right)
-;		V.2.5.-2026.04.01: Resizable window, draggable splitter, saved layout
-;		V.2.6.-2026.04.01: Fixed splitter drag via WM messages, anchored buttons
-;		V.2.7.-2026.04.01: Config read from SyMenuItem.xml, exclusion list support
+;		V.1.0.-2017.01.27: First version by VVV_Easy_SyMenu
+;		V.2.7.-2026.04.01: Updated to x64 with enhancements by sl23
+;							Converted to AHK v2
+;							Added exclusion list support via Exclusions.txt
+;							Inline edit/save for exclusions, path fixes
+;							Settings persistence via Settings.ini
+;							Side-by-side layout (exclusions left, log right)
+;							Resizable window, draggable splitter, saved layout
+;							Fixed splitter drag via WM messages, anchored buttons
+;							Config read from SyMenuItem.xml, exclusion list support
+;							Reorganised gui for a cleaner look.
 ;
 ;------------------------------------------------------------
+; Directives
+;@Ahk2Exe-SetDescription SyMenu Orphan Icons Cleaner
+;@Ahk2Exe-SetVersion 2.7.0.0
+;@Ahk2Exe-SetCopyright © 2026
+;@Ahk2Exe-SetName SyMenu Orphan Icons Cleaner
+;@Ahk2Exe-SetOrigFilename SyMenu_Orphan_Icons v2.exe
+;@Ahk2Exe-SetCompanyName sl23
+;@Ahk2Exe-SetMainIcon %A_ScriptDir%\icon.ico
+;------------------------------------------------------------
+
 	#Requires AutoHotkey v2.0
 	#Warn
 	#SingleInstance Off
@@ -20,7 +32,7 @@
 	SplitPath(A_ScriptName, , , , &ScriptName)
 
 ;Program behavior and Global variables
-	global s_LogFile       := A_ScriptDir . "\" . ScriptName . ".log"
+	global s_LogFile       := A_ScriptDir . "\OrphanIcons.log"
 	global s_ExcludeFile   := A_ScriptDir . "\Exclusions.txt"
 	global s_SettingsFile  := A_ScriptDir . "\Settings.ini"
 	global b_DeleteAction  := False
