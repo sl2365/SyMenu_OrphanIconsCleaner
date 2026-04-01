@@ -57,7 +57,7 @@
 	btnFolder.OnEvent("Click", GetFolder)
 	MainGui.SetFont("Bold")
 	MainGui.BackColor := "White"
-	global txtPath := MainGui.Add("Text", "x90 y12 w870 cBlue Border vtxtPath", "  " . s_SyMenuPath)
+	global txtPath := MainGui.Add("Text", "x90 y11 w870 cBlue Border vtxtPath", "  " . s_SyMenuPath)
 	MainGui.SetFont("Norm")
 	MainGui.BackColor := "Default"
 
@@ -123,14 +123,14 @@ ApplyLayout(winW, winH) {
 	global i_SplitterX, i_Margin, i_SplitterW
 	global txtPath, edtExclude, ctrlSplitter, edtLog
 	global txtExcLabel, txtLogLabel, btnEdit, btnSave, btnGo
-	global chkNewLog, chkVerbose
+	global chkNewLog, chkVerbose, MainGui
 
 	global i_LastWinW := winW
 	global i_LastWinH := winH
 
 	; Clamp splitter position
-	minLeft := 260
-	minRight := 200
+	minLeft := 250
+	minRight := 250
 	maxSplitX := winW - i_Margin - minRight - i_SplitterW
 	if (i_SplitterX < minLeft)
 		i_SplitterX := minLeft
@@ -147,23 +147,24 @@ ApplyLayout(winW, winH) {
 	rightX := i_SplitterX + i_SplitterW + 4
 	rightW := winW - rightX - i_Margin
 
-	txtPath.Move(90, 12, winW - 100)
+	; Batch all 11 control moves into one operation
+	SWP_NOZORDER := 0x0004
+	SWP_NOACTIVATE := 0x0010
+	flags := SWP_NOZORDER | SWP_NOACTIVATE
 
-	; Left column
-	txtExcLabel.Move(i_Margin, 60)
-	edtExclude.Move(i_Margin, editTop, leftW, editH)
-	btnGo.Move(i_Margin, btnRowY)
-	btnEdit.Move(i_Margin + 80, btnRowY)
-	btnSave.Move(i_Margin + 160, btnRowY)
-
-	; Splitter bar
-	ctrlSplitter.Move(i_SplitterX, 60, i_SplitterW, editH + 18)
-
-	; Right column
-	txtLogLabel.Move(rightX, 60)
-	edtLog.Move(rightX, editTop, rightW, editH)
-	chkNewLog.Move(rightX, btnRowY)
-	chkVerbose.Move(rightX, btnRowY + 20)
+	hdwp := DllCall("BeginDeferWindowPos", "Int", 11, "Ptr")
+	hdwp := DllCall("DeferWindowPos", "Ptr", hdwp, "Ptr", txtPath.Hwnd, "Ptr", 0, "Int", 90, "Int", 11, "Int", winW - 100, "Int", 16, "UInt", flags, "Ptr")
+	hdwp := DllCall("DeferWindowPos", "Ptr", hdwp, "Ptr", txtExcLabel.Hwnd, "Ptr", 0, "Int", i_Margin, "Int", 60, "Int", leftW, "Int", 16, "UInt", flags, "Ptr")
+	hdwp := DllCall("DeferWindowPos", "Ptr", hdwp, "Ptr", edtExclude.Hwnd, "Ptr", 0, "Int", i_Margin, "Int", editTop, "Int", leftW, "Int", editH, "UInt", flags, "Ptr")
+	hdwp := DllCall("DeferWindowPos", "Ptr", hdwp, "Ptr", btnGo.Hwnd, "Ptr", 0, "Int", i_Margin, "Int", btnRowY, "Int", 75, "Int", 28, "UInt", flags, "Ptr")
+	hdwp := DllCall("DeferWindowPos", "Ptr", hdwp, "Ptr", btnEdit.Hwnd, "Ptr", 0, "Int", i_Margin + 80, "Int", btnRowY, "Int", 75, "Int", 28, "UInt", flags, "Ptr")
+	hdwp := DllCall("DeferWindowPos", "Ptr", hdwp, "Ptr", btnSave.Hwnd, "Ptr", 0, "Int", i_Margin + 160, "Int", btnRowY, "Int", 75, "Int", 28, "UInt", flags, "Ptr")
+	hdwp := DllCall("DeferWindowPos", "Ptr", hdwp, "Ptr", ctrlSplitter.Hwnd, "Ptr", 0, "Int", i_SplitterX, "Int", 60, "Int", i_SplitterW, "Int", editH + 18, "UInt", flags, "Ptr")
+	hdwp := DllCall("DeferWindowPos", "Ptr", hdwp, "Ptr", txtLogLabel.Hwnd, "Ptr", 0, "Int", rightX, "Int", 60, "Int", rightW, "Int", 16, "UInt", flags, "Ptr")
+	hdwp := DllCall("DeferWindowPos", "Ptr", hdwp, "Ptr", edtLog.Hwnd, "Ptr", 0, "Int", rightX, "Int", editTop, "Int", rightW, "Int", editH, "UInt", flags, "Ptr")
+	hdwp := DllCall("DeferWindowPos", "Ptr", hdwp, "Ptr", chkNewLog.Hwnd, "Ptr", 0, "Int", rightX, "Int", btnRowY, "Int", rightW, "Int", 20, "UInt", flags, "Ptr")
+	hdwp := DllCall("DeferWindowPos", "Ptr", hdwp, "Ptr", chkVerbose.Hwnd, "Ptr", 0, "Int", rightX, "Int", btnRowY + 20, "Int", rightW, "Int", 20, "UInt", flags, "Ptr")
+	DllCall("EndDeferWindowPos", "Ptr", hdwp)
 }
 
 GuiSizeHandler(thisGui, minMax, w, h) {
