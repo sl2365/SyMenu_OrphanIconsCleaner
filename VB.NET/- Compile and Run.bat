@@ -1,7 +1,7 @@
 @echo off
 :: Set Variables:
 set EXENAME=SyMenuOrphanIcons.exe
-set DESTDIR=D:\SyMenu\ProgramFiles\SPSSuite\SyMenuSuite\SyMenu_Orphan_Icons_Cleaner_sps
+set DESTDIR=D:\path\to\compiled\application\folder
 
 :: Set the working directory:
 cd /d "%~dp0"
