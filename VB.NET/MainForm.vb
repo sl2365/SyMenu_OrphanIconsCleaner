@@ -34,6 +34,7 @@ Public Class MainForm
     Private b_NewLogFile As Boolean = True
     Private b_VerboseLog As Boolean = False
     Private s_TextLog As String = ""
+    Private i_SplitterDistance As Integer = -1
 
     ' === Paths ===
     Private ReadOnly s_AppDir As String = AppDomain.CurrentDomain.BaseDirectory
@@ -124,7 +125,9 @@ Public Class MainForm
         txtExclude.Multiline = True
         txtExclude.ScrollBars = ScrollBars.Vertical
         txtExclude.WordWrap = True
-        txtExclude.Dock = DockStyle.Fill
+        txtExclude.Dock = DockStyle.None
+        txtExclude.Location = New Point(0, 22)
+        txtExclude.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
         txtExclude.ReadOnly = True
         txtExclude.Text = GetExcludeDisplay()
 '         toolTip.SetToolTip(txtExclude, "One filename.ico per line." & vbCrLf & "Comments are ignored")
@@ -159,7 +162,9 @@ Public Class MainForm
         txtLog.Multiline = True
         txtLog.ScrollBars = ScrollBars.Vertical
         txtLog.WordWrap = True
-        txtLog.Dock = DockStyle.Fill
+        txtLog.Dock = DockStyle.None
+        txtLog.Location = New Point(0, 22)
+        txtLog.Anchor = AnchorStyles.Top Or AnchorStyles.Bottom Or AnchorStyles.Left Or AnchorStyles.Right
         txtLog.ReadOnly = True
 
         Dim rightBtnPanel As New Panel()
@@ -225,6 +230,8 @@ Public Class MainForm
                         If Integer.TryParse(value, h) AndAlso h > 0 Then Me.Height = h
                     Case "SplitterDistance"
                         ' Applied after UI init
+                        Dim d As Integer
+                        If Integer.TryParse(value, d) AndAlso d > 0 Then i_SplitterDistance = d
                 End Select
             Next
         Catch
@@ -315,7 +322,15 @@ Public Class MainForm
         Try
             splitter.Panel1MinSize = 240
             splitter.Panel2MinSize = 240
-            splitter.SplitterDistance = splitter.Width \ 2
+            If i_SplitterDistance > 0 Then
+                splitter.SplitterDistance = i_SplitterDistance
+            Else
+                splitter.SplitterDistance = splitter.Width \ 2
+            End If
+
+            ' Size textboxes to fit between label (22px) and button panel (52px)
+            txtExclude.Size = New Size(splitter.Panel1.ClientSize.Width, splitter.Panel1.ClientSize.Height - 22 - 52)
+            txtLog.Size = New Size(splitter.Panel2.ClientSize.Width, splitter.Panel2.ClientSize.Height - 22 - 52)
         Catch
         End Try
     End Sub
@@ -371,8 +386,8 @@ Public Class MainForm
     ' LOGGING
     ' ==========================================================================
     Private Sub ScriptLog(msg As String, Optional tabDeep As Integer = 0)
-        Dim prefix As String = New String(vbTab, tabDeep)
-        If tabDeep > 0 Then prefix &= "|"
+        Dim prefix As String = New String(" "c, tabDeep * 4)
+        If tabDeep > 0 Then prefix &= "| "
         Dim fullMsg As String = prefix & msg & vbCrLf
 
         s_TextLog &= fullMsg
