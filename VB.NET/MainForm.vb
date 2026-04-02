@@ -1,5 +1,6 @@
 Imports System
 Imports System.Collections.Generic
+Imports System.Diagnostics
 Imports System.Drawing
 Imports System.IO
 Imports System.IO.Compression
@@ -19,7 +20,7 @@ Public Class MainForm
     Private txtExclude As TextBox
     Private WithEvents btnGo As Button
     Private WithEvents btnEdit As Button
-    Private WithEvents btnSave As Button
+'     Private WithEvents btnSave As Button
     Private splitter As SplitContainer
     Private lblLogLabel As Label
     Private txtLog As TextBox
@@ -39,6 +40,10 @@ Public Class MainForm
     Private ReadOnly s_LogFile As String
     Private ReadOnly s_ExcludeFile As String
     Private ReadOnly s_SettingsFile As String
+
+    Private Declare Function SetForegroundWindow Lib "user32" (ByVal hWnd As IntPtr) As Boolean
+    Private Declare Function ShowWindow Lib "user32" (ByVal hWnd As IntPtr, ByVal nCmdShow As Integer) As Boolean
+    Private Const SW_RESTORE As Integer = 9
 
     ' === Exclusion list ===
     Private a_ExcludeList As New Dictionary(Of String, Boolean)(StringComparer.OrdinalIgnoreCase)
@@ -88,7 +93,7 @@ Public Class MainForm
         lblPath.Font = New Font(lblPath.Font, FontStyle.Bold)
         lblPath.BorderStyle = BorderStyle.FixedSingle
         topPanel.Controls.Add(lblPath)
-        lblPath.Size = New Size(topPanel.ClientSize.Width - lblPath.Left, 18)
+        lblPath.Size = New Size(topPanel.ClientSize.Width - lblPath.Left, 16)
         lblPath.Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
 
         chkDelete = New CheckBox()
@@ -109,12 +114,11 @@ Public Class MainForm
 
         ' === Left panel (exclusions) ===
         lblExcLabel = New Label()
-        lblExcLabel.Text = "Excluded icons (one filename.ico per line):"
+        lblExcLabel.Text = "Excluded icons (one per line):"
         lblExcLabel.ForeColor = Color.Purple
         lblExcLabel.Dock = DockStyle.Top
         lblExcLabel.Height = 22
         lblExcLabel.Padding = New Padding(0, 0, 0, 2)
-        splitter.Panel1.Controls.Add(lblExcLabel)
 
         txtExclude = New TextBox()
         txtExclude.Multiline = True
@@ -123,8 +127,7 @@ Public Class MainForm
         txtExclude.Dock = DockStyle.Fill
         txtExclude.ReadOnly = True
         txtExclude.Text = GetExcludeDisplay()
-        toolTip.SetToolTip(txtExclude, "One filename.ico per line." & vbCrLf & "Comments are ignored")
-        splitter.Panel1.Controls.Add(txtExclude)
+'         toolTip.SetToolTip(txtExclude, "One filename.ico per line." & vbCrLf & "Comments are ignored")
 
         Dim leftBtnPanel As New Panel()
         leftBtnPanel.Dock = DockStyle.Bottom
@@ -144,16 +147,6 @@ Public Class MainForm
         toolTip.SetToolTip(btnEdit, "Edit the exclusion list")
         leftBtnPanel.Controls.Add(btnEdit)
 
-        btnSave = New Button()
-        btnSave.Text = "Save"
-        btnSave.Location = New Point(165, 10)
-        btnSave.Size = New Size(75, 28)
-        btnSave.Enabled = False
-        toolTip.SetToolTip(btnSave, "Save changes to the exclusion list")
-        leftBtnPanel.Controls.Add(btnSave)
-
-        splitter.Panel1.Controls.Add(leftBtnPanel)
-
         ' === Right panel (log) ===
         lblLogLabel = New Label()
         lblLogLabel.Text = "Log Window:"
@@ -161,7 +154,6 @@ Public Class MainForm
         lblLogLabel.Dock = DockStyle.Top
         lblLogLabel.Height = 22
         lblLogLabel.Padding = New Padding(0, 0, 0, 2)
-        splitter.Panel2.Controls.Add(lblLogLabel)
 
         txtLog = New TextBox()
         txtLog.Multiline = True
@@ -169,14 +161,13 @@ Public Class MainForm
         txtLog.WordWrap = True
         txtLog.Dock = DockStyle.Fill
         txtLog.ReadOnly = True
-        splitter.Panel2.Controls.Add(txtLog)
 
         Dim rightBtnPanel As New Panel()
         rightBtnPanel.Dock = DockStyle.Bottom
         rightBtnPanel.Height = 48
 
         chkNewLog = New CheckBox()
-        chkNewLog.Text = "Delete Log File?"
+        chkNewLog.Text = "Delete Log File"
         chkNewLog.Location = New Point(5, 5)
         chkNewLog.AutoSize = True
         chkNewLog.Checked = b_NewLogFile
@@ -184,25 +175,23 @@ Public Class MainForm
         rightBtnPanel.Controls.Add(chkNewLog)
 
         chkVerbose = New CheckBox()
-        chkVerbose.Text = "Log All Events?"
+        chkVerbose.Text = "Log All Events"
         chkVerbose.Location = New Point(5, 25)
         chkVerbose.AutoSize = True
         chkVerbose.Checked = b_VerboseLog
         toolTip.SetToolTip(chkVerbose, "Log all icons, not just orphans")
         rightBtnPanel.Controls.Add(chkVerbose)
 
-        splitter.Panel2.Controls.Add(rightBtnPanel)
-
         ' Add splitter to form (add AFTER topPanel so docking works correctly)
-'         Left panel - add Bottom, then Fill, then Top last
-'         splitter.Panel1.Controls.Add(leftBtnPanel)
-'         splitter.Panel1.Controls.Add(txtExclude)
-'         splitter.Panel1.Controls.Add(lblExcLabel)
+        ' Left panel - add Bottom, then Fill, then Top last
+        splitter.Panel1.Controls.Add(leftBtnPanel)
+        splitter.Panel1.Controls.Add(txtExclude)
+        splitter.Panel1.Controls.Add(lblExcLabel)
 
-'         Right panel - add Bottom, then Fill, then Top last
-'         splitter.Panel2.Controls.Add(rightBtnPanel)
-'         splitter.Panel2.Controls.Add(txtLog)
-'         splitter.Panel2.Controls.Add(lblLogLabel)
+        ' Right panel - add Bottom, then Fill, then Top last
+        splitter.Panel2.Controls.Add(rightBtnPanel)
+        splitter.Panel2.Controls.Add(txtLog)
+        splitter.Panel2.Controls.Add(lblLogLabel)
 
         ' Add splitter to form (add AFTER topPanel so docking works correctly)
         Me.Controls.Add(splitter)
@@ -246,10 +235,12 @@ Public Class MainForm
     Private Sub SaveSettings()
         Try
             Dim sb As New StringBuilder()
+            sb.AppendLine("[General]")
             sb.AppendLine("SyMenuPath=" & s_SyMenuPath)
             sb.AppendLine("DeleteAction=" & If(b_DeleteAction, "1", "0"))
             sb.AppendLine("NewLogFile=" & If(b_NewLogFile, "1", "0"))
             sb.AppendLine("VerboseLog=" & If(b_VerboseLog, "1", "0"))
+            sb.AppendLine("[WindowSizes]")
             sb.AppendLine("WindowWidth=" & Me.Width.ToString())
             sb.AppendLine("WindowHeight=" & Me.Height.ToString())
             If splitter IsNot Nothing Then
@@ -272,7 +263,7 @@ Public Class MainForm
                 "; SyMenu Orphan Icons - Exclusion List" & vbCrLf &
                 "; ----------------------------------------" & vbCrLf &
                 "; Add one icon filename per line to prevent it from being moved or deleted." & vbCrLf &
-                "; Commented lines starting with ; are ignored." & vbCrLf &
+                "; Comments starting with ; are ignored." & vbCrLf &
                 "; Blank lines are also ignored." & vbCrLf &
                 "; Comments can be amended and saved." & vbCrLf &
                 "; Examples:" & vbCrLf &
@@ -322,8 +313,8 @@ Public Class MainForm
     Protected Overrides Sub OnLoad(e As EventArgs)
         MyBase.OnLoad(e)
         Try
-            splitter.Panel1MinSize = 260
-            splitter.Panel2MinSize = 200
+            splitter.Panel1MinSize = 240
+            splitter.Panel2MinSize = 240
             splitter.SplitterDistance = splitter.Width \ 2
         Catch
         End Try
@@ -345,28 +336,30 @@ Public Class MainForm
     End Sub
 
     Private Sub btnEdit_Click(sender As Object, e As EventArgs) Handles btnEdit.Click
-        txtExclude.ReadOnly = False
-        btnEdit.Enabled = False
-        btnSave.Enabled = True
-    End Sub
+        If txtExclude.ReadOnly Then
+            ' Switch to Edit mode
+            txtExclude.ReadOnly = False
+            btnEdit.Text = "Save"
+            toolTip.SetToolTip(btnEdit, "Save changes to the exclusion list")
+        Else
+            ' Save and switch back
+            Dim newContent As String = txtExclude.Text
+            File.WriteAllText(s_ExcludeFile, newContent)
 
-    Private Sub btnSave_Click(sender As Object, e As EventArgs) Handles btnSave.Click
-        Dim newContent As String = txtExclude.Text
-        File.WriteAllText(s_ExcludeFile, newContent)
+            a_ExcludeList.Clear()
+            For Each line As String In newContent.Split(New String() {vbCrLf, vbLf}, StringSplitOptions.None)
+                Dim trimmed As String = line.Trim()
+                If trimmed = "" OrElse trimmed.StartsWith(";") Then Continue For
+                a_ExcludeList(trimmed) = True
+            Next
 
-        a_ExcludeList.Clear()
-        For Each line As String In newContent.Split(New String() {vbCrLf, vbLf}, StringSplitOptions.None)
-            Dim trimmed As String = line.Trim()
-            If trimmed = "" OrElse trimmed.StartsWith(";") Then Continue For
-            a_ExcludeList(trimmed) = True
-        Next
+            txtExclude.ReadOnly = True
+            btnEdit.Text = "Edit"
+            toolTip.SetToolTip(btnEdit, "Edit the exclusion list")
 
-        txtExclude.ReadOnly = True
-        btnEdit.Enabled = True
-        btnSave.Enabled = False
-
-        MessageBox.Show("Exclusion list saved: " & a_ExcludeList.Count & " icon(s) excluded.",
-                        "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Exclusion list saved: " & a_ExcludeList.Count & " icon(s) excluded.",
+                            "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        End If
     End Sub
 
     Protected Overrides Sub OnFormClosing(e As FormClosingEventArgs)
@@ -542,12 +535,27 @@ Public Class MainForm
     ' ==========================================================================
     <STAThread>
     Public Shared Sub Main()
-        Application.EnableVisualStyles()
-        Application.SetCompatibleTextRenderingDefault(False)
-        Try
-            Application.Run(New MainForm())
-        Catch ex As Exception
-            MessageBox.Show("Startup error:" & Environment.NewLine & ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
-        End Try
+        Dim createdNew As Boolean
+        Using mtx As New System.Threading.Mutex(True, "SyMenuOrphanIconsCleaner_SingleInstance", createdNew)
+            If Not createdNew Then
+                Dim current As Process = Process.GetCurrentProcess()
+                For Each p As Process In Process.GetProcessesByName(current.ProcessName)
+                    If p.Id <> current.Id AndAlso p.MainWindowHandle <> IntPtr.Zero Then
+                        ShowWindow(p.MainWindowHandle, SW_RESTORE)
+                        SetForegroundWindow(p.MainWindowHandle)
+                        Exit For
+                    End If
+                Next
+                Return
+            End If
+
+            Application.EnableVisualStyles()
+            Application.SetCompatibleTextRenderingDefault(False)
+            Try
+                Application.Run(New MainForm())
+            Catch ex As Exception
+                MessageBox.Show("Startup error:" & Environment.NewLine & ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            End Try
+        End Using
     End Sub
 End Class
