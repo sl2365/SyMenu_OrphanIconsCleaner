@@ -8,7 +8,7 @@ Over time, as you add and remove portable apps from your SyMenu setup, unused `.
 There are three versions:
 AutoHotkey v1 was the original source code by VVV_Easy_SyMenu.
 AutoHotkey v2 was updated and enhanced by me.
-VB.NET also by me, is the active version and was created to avoid the incessant false positives by windows defender.
+VB.NET v3 also by me, is the active version and was created to avoid the incessant false positives by windows defender.
 
 ## Features
 
