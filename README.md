@@ -1,5 +1,11 @@
 # SyMenu Orphan Icons Cleaner
 
+## NOTE:
+There are three versions:
+AutoHotkey v1 was the original source code by VVV_Easy_SyMenu.
+AutoHotkey v2 was updated and enhanced by me.
+VB.NET also by me, is the active version and was created to avoid the incessant false positives by windows defender.
+
 A utility for [SyMenu](https://www.ugmfree.it) portable menu users that identifies and removes orphaned icon files — icons that exist in the `Icons` folder but are no longer referenced by any menu item in the SyMenu configuration.
 
 Over time, as you add and remove portable apps from your SyMenu setup, unused `.ico` files can accumulate in the `Icons` folder. This tool cleans them up, keeping your SyMenu installation tidy.
