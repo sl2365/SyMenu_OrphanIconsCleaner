@@ -536,7 +536,7 @@ Public Class MainForm
         End If
 
         ' Summary
-        Dim summary As String = String.Format("Finished. Active: {0} | Orphans: {1} | Excluded: {2}",
+        Dim summary As String = String.Format("Finished. Active: {0} | Orphans: {1} | Excluded: {2}" & vbCrLf & "Orphans: {1} icons moved to SyMenuSuite/_Trash folder",
                                                activeCount, orphanCount, excludedCount)
         ScriptLog(TimeStamp() & " - " & summary)
         ScriptLog(TimeStamp() & " - " & Environment.UserName & "! " & New String("-"c, 60))
