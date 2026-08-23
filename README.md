@@ -71,21 +71,29 @@ Keep the executable in a writable folder so its settings, exclusions, and log ca
 
 ## Usage
 
-### First Run
+### First run
 
-1. Run `SyMenu_Orphan_Icons v2.ahk` (or the compiled `.exe`)
-2. Click **Browse...** to select your SyMenu root folder (e.g. `D:\SyMenu`)
-3. The path is saved automatically for future runs
+1. Start `SyMenuOrphanIcons.exe`.
+2. Click **Browse...**.
+3. Select the root folder of the working SyMenu installation, (e.g. `D:\SyMenu`).
+4. Optionally edit the exclusions or select the required logging and deletion options.
+5. Click **Go!**.
 
-### Scanning for Orphans
+The selected path and options are saved when a scan begins and when the application closes.
 
-1. Click **Go!** to start the scan
-2. The script will:
-   - Extract `SyMenuItem.xml` from `SyMenu\Config\SyMenuItem.zip`
-   - Scan every `.ico` file in `SyMenu\Icons`
-   - Check each icon filename against the configuration
-   - Move (or delete) any icons not found in the configuration
-3. Results are shown in the log window and a summary message box
+### Scan process
+
+When **Go!** is clicked, the application:
+
+1. Validates `SyMenu\Icons` and `SyMenu\Config\SyMenuItem.zip`.
+2. Reads `SyMenuItem.xml` directly from the ZIP archive without extracting it to disk.
+3. Compares every top-level `.ico` filename in `SyMenu\Icons` with the configuration text, ignoring filename case.
+4. Skips filenames listed in `Exclusions.ini`.
+5. Moves each orphan to the trash folder, replacing an existing file of the same name there.
+6. If **Delete Icons** is enabled, removes the orphan-icons trash folder after the move, permanently deleting its contents.
+7. Shows and logs a summary of active, orphaned, and excluded icons.
+
+> **Caution:** **Delete Icons** permanently removes the orphaned icons. Leave it unchecked for the safer, reviewable move-to-trash behaviour.
 
 ### Options
 
