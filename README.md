@@ -31,14 +31,43 @@ There are three versions:
 
 ## Requirements
 
-- [AutoHotkey v2.0](https://www.autohotkey.com/) or later
-- A working [SyMenu](https://www.ugmfree.it) installation
+### To run the compiled application
+
+- 64-bit Windows.
+- [.NET Framework 4.8 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48).
+- A working [SyMenu](https://www.ugmfree.it) installation containing:
+  - `Icons`.
+  - `Config\SyMenuItem.zip` with `SyMenuItem.xml` inside it.
+- Write permission for the folder containing `SyMenuOrphanIcons.exe`, because the application creates and updates `Settings.ini`, `Exclusions.ini`, and `Log.ini` beside the executable.
+- Write permission for the selected SyMenu installation when icons are moved or deleted.
+
+No third-party libraries or NuGet packages are required.
+
+### To build from source
+
+- 64-bit Windows.
+- [.NET Framework 4.8 Developer Pack](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48), which supplies the required reference assemblies and MSBuild support.
+- The included build script expects 64-bit .NET Framework MSBuild at:
+  `C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe`
+
+The project uses only .NET Framework assemblies: `System`, `System.Drawing`, `System.IO.Compression`, `System.IO.Compression.FileSystem`, `System.Windows.Forms`, and `System.Xml`.
 
 ## Installation
 
-1. Download or clone this repository
-2. Place the script files in a folder of your choice (e.g. inside your SyMenu `ProgramFiles` directory)
-3. Ensure AutoHotkey v2.0+ is installed, or use a compiled `.exe` version
+### Pre-built release
+
+1. Download `SyMenuOrphanIconsCleaner.zip` from the latest release.
+2. Extract it to a writable folder, such as a folder under SyMenu's `ProgramFiles` directory.
+3. Run `SyMenuOrphanIcons.exe`.
+
+Keep the executable in a writable folder so its settings, exclusions, and log can be saved.
+
+### Build from source
+
+1. Install the .NET Framework 4.8 Developer Pack.
+2. Extract or clone all project files into the same folder.
+3. Double-click `- Compile and Run.bat`.
+4. The script builds the `Release|x64` configuration, copies `SyMenuOrphanIcons.exe` into the `TEST` folder, and starts it.
 
 ## Usage
 
@@ -75,7 +104,7 @@ Some icons may not be referenced in `SyMenuItem.xml` but you still want to keep 
 3. Lines starting with `;` are treated as comments and ignored
 4. Click **Save** to apply your changes
 
-The exclusion list is stored in `Exclusions.txt` alongside the script.
+The exclusion list is stored in `Exclusions.ini` alongside the script. Filename matching in the exclusion list is case-insensitive. If `Exclusions.ini` does not exist, the application creates a commented starter file automatically.
 
 ### GUI Layout
 
@@ -105,6 +134,7 @@ The script extracts this XML, then performs a simple text search for each `.ico`
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v3.0.2 | 2026-04-08 | Active VB.NET x64 Windows Forms release targeting .NET Framework 4.8; ZIP configuration reading, exclusions, persistent settings, logging, single-instance handling, and move/delete cleanup. |
 | v2.7 | 2026-04-01 | Config read from SyMenuItem.xml, exclusion list support |
 | v2.6 | 2026-04-01 | Fixed splitter drag via WM messages, anchored buttons |
 | v2.5 | 2026-04-01 | Resizable window, draggable splitter, saved layout |
@@ -118,7 +148,7 @@ The script extracts this XML, then performs a simple text search for each `.ico`
 ## Credits
 
 - Original v1 script by the VVV_Easy_SyMenu
-- v2 conversion and enhancements with assistance from GitHub Copilot by sl23
+- v2 conversion, enhancements, and v3 VB.NET application: sl23, with AI coding assistance.
 
 ## License
 
